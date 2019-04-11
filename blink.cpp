@@ -5,11 +5,15 @@
 #define STACK_SIZE 200
 #include <semphr.h>
 #include <queue.h>
-#define dataPin 4
-#define latchPin 5
-#define clockPin 6
-#define speaker 7
-#define Rear 12
+#define dataPin 7
+#define latchPin 8
+#define clockPin 13
+#define RIGHT_BACK_SPEED 3
+#define LEFT_FRONT_SPEED 12
+#define RIGHT_FRONT_SPEED 9 //front ones
+#define LEFT_BACK_SPEED 4
+//#define speaker 
+#define Rear 3
 //left with pin 13 unused
 byte leds = 0;
 
@@ -21,6 +25,9 @@ TickType_t xTickTime = 1000;
 void playNote(char note, int duration){
 char names[] = {'c','d','e','f'};
 int tones [] = {1915,1700,1519,1432};
+int threshold;
+int threshold2;
+boolean flag;
 
 for (int i=0; i<4;i++){
 	if(names[i]==note){
@@ -119,6 +126,37 @@ void taskMotorStationary(){
 }
 
 void taskMotorForward(){
+	while(1){
+	if(millis()<threshold){
+          analogWrite(RIGHT_BACK_SPEED, 255);
+          analogWrite(LEFT_FRONT_SPEED, 190); //right motor moves forward at full speed
+          analogWrite(LEFT_BACK_SPEED, 130); 
+          analogWrite(RIGHT_FRONT_SPEED, 255);
+        } 
+		
+    if(millis()>threshold){
+    if(flag==0){
+      threshold2 =millis()+400;
+      while(millis()<threshold2){
+      analogWrite(RIGHT_BACK_SPEED, 255);
+      analogWrite(LEFT_FRONT_SPEED, 180); //right motor moves forward at full speed
+      analogWrite(LEFT_BACK_SPEED, 0); 
+      analogWrite(RIGHT_FRONT_SPEED, 255);
+      }
+      flag=1;
+    } 
+    else if(flag==1){
+      threshold2 = millis()+500;
+      while(millis()<threshold2){
+      analogWrite(RIGHT_BACK_SPEED, 255);
+      analogWrite(LEFT_FRONT_SPEED, 0); //right motor moves forward at full speed
+      analogWrite(LEFT_BACK_SPEED, 190); 
+      analogWrite(RIGHT_FRONT_SPEED, 255);
+      }
+      flag=0;
+    }
+    }
+}
 
 }
 
@@ -234,6 +272,11 @@ void setup() {
 	pinMode(latchPin, OUTPUT);
 	pinMode(dataPin, OUTPUT);
 	pinMode(clockPin, OUTPUT);
+	pinMode(LEFT_FRONT_SPEED, OUTPUT);
+        pinMode(RIGHT_BACK_SPEED, OUTPUT);
+        pinMode(RIGHT_FRONT_SPEED, OUTPUT);
+        pinMode(LEFT_BACK_SPEED, OUTPUT);
+        threshold = millis() + 200;
 
 }
 
